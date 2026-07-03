@@ -1,0 +1,21 @@
+node_modules
+dist
+out
+.DS_Store
+.eslintcache
+*.log*
+
+# Databases and locks
+*.db
+*.db-wal
+*.db-shm
+cognitwin.db
+
+# Local large LLM GGUF models
+resources/models/
+*.gguf
+
+# Environment variables
+.env
+.env.local
+.env.*.local
