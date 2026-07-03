@@ -37,10 +37,19 @@ Built using **Electron, React, TypeScript, and SQLite**, CogniTwin processes all
 ---
 
 ## 🛠️ Technical Stack
-* **Framework**: Electron (Main/Preload process)
-* **Frontend**: React, TypeScript, TailwindCSS/Vanilla CSS, Recharts
+* **Desktop Shell**: Electron (Main/Preload process)
+* **Mobile Shell**: CapacitorJS (Android native Gradle container)
+* **API Server**: Express (Port `3000`), CORS, Server-Sent Events (SSE)
+* **Frontend**: React, TypeScript, Vanilla CSS, Recharts
 * **Database**: SQLite (`better-sqlite3`), `sqlite-vec` (vector database extensions)
 * **Local ML**: `node-llama-cpp` (ESM dynamic load) for offline GGUF LLMs
+
+---
+
+## 📱 Cross-Platform Architecture (Web & Mobile)
+CogniTwin is designed to run in two modes:
+1. **Desktop Native (Electron)**: The application boots as a single process running a native desktop window.
+2. **Client-Server (Web & Mobile)**: The backend runs as a headless server (Port `3000`), and clients connect via standard web browsers or the native Android app.
 
 ---
 
@@ -48,8 +57,8 @@ Built using **Electron, React, TypeScript, and SQLite**, CogniTwin processes all
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/cognitwin.git
-cd cognitwin
+git clone https://github.com/ik123a/CogniTwin.git
+cd CogniTwin
 ```
 
 ### 2. Install Dependencies
@@ -58,25 +67,44 @@ npm install
 ```
 
 ### 3. Rebuild Native Modules (Required for SQLite)
-To ensure the native C++ bindings for SQLite and other binaries match your Electron runtime, run:
+To ensure the native C++ bindings for SQLite match your local Node/Electron runtimes, execute:
 ```bash
 npm run postinstall
 ```
 
 ### 4. Setup Local LLM Model
-Ensure you have the GGUF model downloaded to `resources/models/qwen2.5-1.5b-instruct-q4_k_m.gguf` or update the path in the LLM service configuration.
+Ensure you have the GGUF model downloaded to `resources/models/qwen2.5-1.5b-instruct-q4_k_m.gguf` or update the model path in the LLM service configuration.
 
 ---
 
 ## 🏃 Running the Application
 
-### Launch Developer Mode
+### 🖥️ Running as a Desktop Client
 ```bash
+# Start Electron dev server (runs core backend server alongside window UI)
 npm run dev
 ```
 
-### Compile & Build Production Bundles
+### 🌐 Running as a Local Web App
+1. Run `npm run dev` to start the backend Express server on Port `3000`.
+2. Open your web browser and navigate to: `http://localhost:5173/`
+3. Click **Configure Server IP** on the login page and enter your PC's IP address (default: `localhost`).
+
+### 📱 Running as a Native Android App
+1. Build the production web bundle and sync assets to Capacitor:
+   ```bash
+   npm run build
+   npx cap copy android
+   ```
+2. Open the `android/` workspace folder in **Android Studio**.
+3. Plug in your Android phone (with USB Debugging active) or select an emulator.
+4. Click **Run/Play** in Android Studio to build the native APK and install it.
+5. On the startup page, click **Configure Server IP**, enter your PC's local network IP address (e.g. `192.168.1.50`), and tap **Initialize Twin**!
+
+---
+
+## ⚙️ Building Production Installers
 ```bash
-# Package the application for production installers
+# Package the desktop application for your host OS installer
 npm run build
 ```
