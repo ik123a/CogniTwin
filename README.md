@@ -12,6 +12,9 @@ Built using **Electron, React, TypeScript, and SQLite**, CogniTwin processes all
 #### 📊 Twin Capacity Simulation Engine
 ![Simulation Engine](resources/screenshots/cognitwin_simulation.png)
 
+#### 📂 Personal Workspace Manager
+![Workspace Manager](resources/screenshots/cognitwin_workspace.png)
+
 #### 📱 Mobile Client (Android Server IP Binding)
 ![Android Client](resources/screenshots/cognitwin_mobile.png)
 
@@ -118,4 +121,119 @@ npm run dev
 ```bash
 # Package the desktop application for your host OS installer
 npm run build
+```
+
+---
+
+## 🏗️ System Architecture & Design
+
+CogniTwin utilizes a unified client-server architecture. It supports running as a desktop client (via Electron) or as a lightweight web app/native Android container (via Capacitor) connecting back to a local network node.
+
+```mermaid
+graph TD
+    subgraph "Clients"
+        A[Electron Desktop Client]
+        B[Web Browser Client]
+        C[Capacitor Android Client]
+    end
+
+    subgraph "API Virtualization"
+        D[Direct Preload Bridge]
+        E[Vite Main Proxy Bridge]
+    end
+
+    subgraph "Backend Core Server"
+        F[Express API Port:3000]
+        G[Electron main Process]
+        H[(SQLite Database)]
+        I[Whisper/Llama AI Services]
+    end
+
+    A -->|Calls| D
+    B -->|Calls| E
+    C -->|Calls| E
+
+    D -->|IPC Channel| G
+    E -->|HTTP RPC/SSE| F
+    F -->|Local Calls| G
+    G -->|SQL Queries| H
+    G -->|Token Streams| I
+```
+
+### 🌉 Dynamic API Bridge Mechanics
+When the app executes on a standard browser or mobile device, the Electron environment is absent. To solve this, a virtual proxy is established inside the React app:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor ReactStore as React Store
+    participant Proxy as window.api Proxy
+    participant HTTP as Express Server (Port 3000)
+    participant Core as Backend Services
+
+    ReactStore->>Proxy: window.api.db.query(sql, params)
+    Proxy->>Proxy: Capture path, convert camelCase to kebab-case
+    Proxy->>HTTP: POST /api/rpc { channel: "db:query", args: { sql, params } }
+    HTTP->>Core: Lookup handler & execute
+    Core-->>HTTP: Return array
+    HTTP-->>Proxy: JSON payload
+    Proxy-->>ReactStore: Deserialized result
+```
+
+### 🗄️ Database Schema & Entities
+
+The SQLite backend database holds all notes, tasks, simulations, audit logs, and checksums.
+
+```mermaid
+erDiagram
+    projects ||--o{ notes : contains
+    projects ||--o{ tasks : tracks
+    notes ||--o{ item_versions : snapshotted_by
+    tasks ||--o{ item_versions : snapshotted_by
+    notes ||--o{ spaced_cards : generates
+    duplicate_groups ||--o{ duplicate_group_members : contains
+    backup_metadata ||--o{ backup_metadata : references_parent
+
+    notes {
+        text id PK
+        text title
+        text content
+        text project_id FK
+        text raw_text
+    }
+
+    tasks {
+        text id PK
+        text title
+        text description
+        text status
+        text priority
+        text project_id FK
+    }
+
+    audit_log {
+        text id PK
+        text user_id
+        text action
+        text entity_type
+        text entity_id
+        text details_json
+        text created_at
+    }
+
+    data_checksums {
+        text entity_type PK
+        text entity_id PK
+        text checksum
+        text verified_at
+    }
+
+    saved_decisions {
+        text id PK
+        text title
+        text description
+        text options_json
+        text factors_json
+        text created_at
+    }
 ```

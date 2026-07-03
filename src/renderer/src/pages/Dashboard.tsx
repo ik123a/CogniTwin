@@ -45,7 +45,7 @@ export default function Dashboard(): React.JSX.Element {
 
     // Fetch recent audit logs from SQLite
     window.api.db
-      .query('SELECT * FROM audit_log ORDER BY timestamp DESC LIMIT 5')
+      .query('SELECT * FROM audit_log ORDER BY created_at DESC LIMIT 5')
       .then((res) => setActivities(res))
       .catch(console.error)
 

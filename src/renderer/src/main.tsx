@@ -87,6 +87,30 @@ if (!(window as any).api) {
         if (channel === 'auth:login') {
           return executeRpc(channel, { password: argsList[0] });
         }
+        if (channel === 'audit:log') {
+          return executeRpc('audit:log', {
+            userId: 'default',
+            action: argsList[0],
+            entityType: argsList[1] || null,
+            entityId: argsList[2] || null,
+            details: argsList[3] || null
+          });
+        }
+        if (channel === 'audit:get') {
+          return executeRpc('audit:get', { filters: argsList[0] });
+        }
+        if (channel === 'audit:entity') {
+          return executeRpc('audit:entity', { entityType: argsList[0], entityId: argsList[1] });
+        }
+        if (channel === 'integrity:verify') {
+          return executeRpc('integrity:verify', { entityType: argsList[0], entityId: argsList[1], currentContent: argsList[2] });
+        }
+        if (channel === 'privacy:createRule') {
+          return executeRpc('privacy:create-rule', { pattern: argsList[0], replacement: argsList[1] });
+        }
+        if (channel === 'privacy:secureDelete') {
+          return executeRpc('privacy:secure-delete', { entityType: argsList[0], entityId: argsList[1] });
+        }
         if (channel === 'db:query' || channel === 'db:get' || channel === 'db:execute') {
           return executeRpc(channel, { sql: argsList[0], params: argsList[1] || [] });
         }
