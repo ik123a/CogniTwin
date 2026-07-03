@@ -60,9 +60,13 @@ const path = require('path');
     console.log('Onboarding Wizard detected. Bypassing steps...');
     for (let i = 0; i < 6; i++) {
       const clicked = await page.evaluate(() => {
-        const btn = document.querySelector('button.btn-primary');
-        if (btn) {
-          btn.click();
+        const btns = Array.from(document.querySelectorAll('button'));
+        const onboardingBtn = btns.find(btn => {
+          const text = btn.textContent || '';
+          return text.includes('Get Started') || text.includes('Continue') || text.includes('Enter CogniTwin');
+        });
+        if (onboardingBtn) {
+          onboardingBtn.click();
           return true;
         }
         return false;
