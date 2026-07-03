@@ -4,6 +4,17 @@ CogniTwin is a local-first, highly secure personal digital twin dashboard design
 
 Built using **Electron, React, TypeScript, and SQLite**, CogniTwin processes all your data locally, ensuring absolute privacy.
 
+### 🖼️ Interfaces Preview
+
+#### 🖥️ Main Dashboard (Desktop/Web)
+![Desktop Dashboard](resources/screenshots/cognitwin_dashboard.png)
+
+#### 📊 Twin Capacity Simulation Engine
+![Simulation Engine](resources/screenshots/cognitwin_simulation.png)
+
+#### 📱 Mobile Client (Android Server IP Binding)
+![Android Client](resources/screenshots/cognitwin_mobile.png)
+
 ---
 
 ## 🚀 Key Features
