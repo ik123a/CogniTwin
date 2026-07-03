@@ -86,6 +86,10 @@ const path = require('path');
   if (!fs.existsSync(screenshotDir)) {
     fs.mkdirSync(screenshotDir, { recursive: true });
   }
+  await page.evaluate(() => {
+    const overlays = document.querySelectorAll('.modal-overlay');
+    overlays.forEach(el => el.style.display = 'none');
+  });
   await page.screenshot({ path: path.join(screenshotDir, 'cognitwin_dashboard.png') });
 
   // Navigate to Twin Simulation
@@ -103,6 +107,10 @@ const path = require('path');
   if (clickedSim) {
     console.log('Waiting for Twin Simulation charts...');
     await new Promise(r => setTimeout(r, 5000));
+    await page.evaluate(() => {
+      const overlays = document.querySelectorAll('.modal-overlay');
+      overlays.forEach(el => el.style.display = 'none');
+    });
     await page.screenshot({ path: path.join(screenshotDir, 'cognitwin_simulation.png') });
   }
 
@@ -121,6 +129,10 @@ const path = require('path');
   if (clickedWorkspace) {
     console.log('Waiting for Workspace to render...');
     await new Promise(r => setTimeout(r, 4000));
+    await page.evaluate(() => {
+      const overlays = document.querySelectorAll('.modal-overlay');
+      overlays.forEach(el => el.style.display = 'none');
+    });
     await page.screenshot({ path: path.join(screenshotDir, 'cognitwin_workspace.png') });
   }
 
