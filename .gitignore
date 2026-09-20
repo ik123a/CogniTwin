@@ -55,3 +55,5 @@ local.properties
 /node_modules/@node-llama-cpp/win-x64-vulkan/bins/win-x64-vulkan/ggml-vulkan.dll
 /node_modules/electron/dist/electron.exe
 /resources/models/qwen2.5-1.5b-instruct-q4_k_m.gguf
+
+/resources/models/qwen2.5-1.5b-instruct-q4_k_m.gguf
