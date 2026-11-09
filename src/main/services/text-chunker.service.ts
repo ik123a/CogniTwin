@@ -81,6 +81,9 @@ export function chunkText(
       chunkIndex++
     }
 
+    // The final chunk already covers the tail; do not emit overlap-only chunks.
+    if (endPos >= cleaned.length) break
+
     // Advance position with overlap
     currentPos = endPos - overlapChars
     if (currentPos >= cleaned.length) break
