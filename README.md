@@ -31,7 +31,9 @@ Embedding generation is configured to refuse remote models, but requires local m
 
 ## Security and data boundaries
 
-Do not use this prototype with sensitive data or expose it on a network. The current Express bridge listens on port 3000 without authentication, uses permissive CORS and forwards registered handlers, including arbitrary SQL and scripting capabilities. The local login screen does not protect that HTTP bridge. Remote access needs a separate authorization design before it is enabled for real data.
+Do not use this prototype with sensitive data or expose it on a network. The HTTP RPC bridge is disabled by default. If explicitly enabled, it binds only to `127.0.0.1` and requires a bearer token on every dispatched request. It still forwards privileged handlers, including arbitrary SQL and scripting capabilities: possession of this token grants workspace-level access, not a restricted user role or sandbox. The local login screen is separate from bridge authentication. Remote access needs a separate authorization design.
+
+For a trusted local browser development session only, generate a random token (for example `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`). Set `COGNITWIN_RPC_TOKEN` in the Electron process environment to that value; at least 32 bytes are required. Set `COGNITWIN_RPC_ORIGIN` to the exact loopback HTTP origin of your renderer, such as `http://localhost:5173`. Other browser origins are rejected; CORS is never wildcard. Keep both values out of committed files, build-time frontend variables and logs. In that renderer's developer console, set `sessionStorage.setItem('cognitwin-rpc-token', '<your generated token>')`. Remove the item when finished; never paste a token into an untrusted page. This manual bridge is for local development, not mobile/network deployment. The browser bridge uses port 3000; `PORT` may change the server port for other trusted local clients.
 
 Encryption helpers use AES-GCM and Electron safeStorage when available, but contain an unencrypted-key fallback and are not evidence that every database field is encrypted. Privacy blur is a display feature. Overwrite-based deletion is not a verified secure erase guarantee on SSDs, backups or journaled filesystems. Earlier claims of absolute privacy, military-grade protection and safe third-party sandboxing have been removed.
 
@@ -51,9 +53,11 @@ Installation initially disables lifecycle scripts. Desktop execution additionall
 With Node 24 (built-in TypeScript stripping):
 
 ```sh
-node --test tests/text-chunker.test.mjs
+node --test tests/text-chunker.test.mjs tests/rpc-access.test.mjs
 ```
 
 Two tests pass. The original chunker emitted an extra overlap-only chunk after covering the final character; the repair stops at the end of the source, avoiding redundant embeddings/search entries. The regression was observed failing before repair. This test runs the real dependency-free chunker; it does not initialize Electron, SQLite or an ML model.
+
+The RPC follow-up adds nine checks (2026-11-10). Six server regressions failed against the original registration function before repair; all now pass. Three renderer checks cover missing-token rejection, bearer headers for both call paths, and streaming HTTP failures. Server tests execute the actual TypeScript registration function with inert Express/Electron boundaries and a synthetic handler. They verify default-off behavior, loopback binding arguments, token/origin rejection and malformed bodies without starting a socket or privileged service. These checks do not establish a successful packaged Electron run or a complete IPC security audit.
 
 Full install/build, desktop behavior and Android packaging remain **unverified**. `npm ci --ignore-scripts` failed with Windows `EPERM` while creating dependency directories. An elevated lifecycle-disabled retry was stopped after sustained machine contention. A renderer-only Vite probe then failed with `spawn EFTYPE` from the partially installed esbuild binary; Electron and its services were never started. No personal data or models were loaded. Existing files in `resources/screenshots/` have not been recaptured or authenticated by this audit, so they are not presented here as current runtime evidence. Use the source diagram above until a clean isolated run can be captured.

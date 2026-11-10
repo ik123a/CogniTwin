@@ -6,14 +6,18 @@ if (!(window as any).api) {
   const streamCallbacks = new Map<string, Function>();
 
   const executeRpc = async (channel: string, args: any) => {
+    const rpcToken = sessionStorage.getItem('cognitwin-rpc-token');
+    if (!rpcToken) throw new Error('Local RPC is disabled or needs a session token; see README.');
+    const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${rpcToken}` };
     if (channel === 'llm:chat-stream') {
       try {
-        const response = await fetch('http://localhost:3000/api/rpc', {
+        const response = await fetch('http://127.0.0.1:3000/api/rpc', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({ channel, args })
         });
 
+        if (!response.ok) throw new Error(`RPC request failed (${response.status})`);
         if (!response.body) return '';
 
         const reader = response.body.getReader();
@@ -50,9 +54,9 @@ if (!(window as any).api) {
       }
     }
 
-    const res = await fetch('http://localhost:3000/api/rpc', {
+    const res = await fetch('http://127.0.0.1:3000/api/rpc', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ channel, args })
     });
     
